@@ -1,0 +1,17 @@
+{
+  "name": "gogecord-alpha",
+  "main": "./src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/node": "^22.9.0",
+    "@types/ws": "^8.5.13",
+    "discord-api-types": "^0.37.105",
+    "ws": "^8.18.0"
+  }
+}
