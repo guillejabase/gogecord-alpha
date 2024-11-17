@@ -6,8 +6,7 @@ export { default as GuildMemberRoleManager } from './managers/GuildMemberRoleMan
 export { default as MessageManager } from './managers/MessageManager.ts';
 export { default as UserManager } from './managers/UserManager.ts';
 
-export { default as Client } from './structures/Client.ts';
-export { default as Event, type Events } from './structures/Event.ts';
+export { default as Client, type Events } from './structures/Client.ts';
 export { default as Guild, type GuildFeature, type GuildMFA, type GuildNSFW, type GuildPremiumTier } from './structures/Guild.ts';
 export { default as GuildAnnouncementChannel } from './structures/GuildAnnouncementChannel.ts';
 export { default as GuildBan } from './structures/GuildBan.ts';

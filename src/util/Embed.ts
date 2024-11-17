@@ -27,7 +27,6 @@ export default class Embed {
         } else {
             this.color = color;
         }
-
         return this;
     }
     public setDescription(description: string): this {

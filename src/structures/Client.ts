@@ -13,13 +13,39 @@ import WebSocket from 'ws';
 import GuildManager from '../managers/GuildManager.ts';
 import UserManager from '../managers/UserManager.ts';
 
-import { type Events } from './Event.ts';
+import type GuildBan from './GuildBan.ts';
+import type { GuildChannel } from './GuildBaseChannel.ts';
+import type Guild from './Guild.ts';
+import type GuildMember from './GuildMember.ts';
+import type GuildRole from './GuildRole.ts';
 import Listener, { type Listeners, listenersNames } from './Listener.ts';
-import { type ActivityType, activityTypes, type Status, statuses } from './Presence.ts';
+import type Message from './Message.ts';
+import Presence, { type ActivityType, activityTypes, type Status, statuses } from './Presence.ts';
 import User from './User.ts';
 
 import Intents, { type IntentsResolvable } from '../util/Intents.ts';
 
+export type Events = {
+    GuildBanAdd: [ban: GuildBan];
+    GuildBanRemove: [ban: GuildBan];
+    GuildChannelCreate: [channel: GuildChannel];
+    GuildChannelDelete: [channel: GuildChannel];
+    GuildChannelUpdate: [oldChannel: GuildChannel, newChannel: GuildChannel];
+    GuildCreate: [guild: Guild];
+    GuildDelete: [guild: Guild];
+    GuildMemberAdd: [member: GuildMember];
+    GuildMemberRemove: [member: GuildMember];
+    GuildMemberUpdate: [oldMember: GuildMember, newMember: GuildMember];
+    GuildRoleCreate: [role: GuildRole];
+    GuildRoleDelete: [role: GuildRole];
+    GuildRoleUpdate: [oldRole: GuildRole, newRole: GuildRole];
+    GuildUpdate: [oldGuild: Guild, newGuild: Guild];
+    MessageCreate: [message: Message];
+    MessageDelete: [message: Message];
+    MessageUpdate: [oldMessage: Message, newMessage: Message];
+    PresenceUpdate: [oldPresence: Presence, newPresence: Presence];
+    Ready: [];
+};
 type RequestOptions = {
     method: 'delete' | 'get' | 'patch' | 'post' | 'put';
     path: string;
@@ -27,7 +53,7 @@ type RequestOptions = {
     reason?: string;
 };
 
-export default class Client extends EventEmitter {
+export default class Client extends EventEmitter<{ [K in keyof Events]: [client: Client, ...Events[K]] }> {
     private processQueue: {
         options: RequestOptions;
         resolve: (data: any) => void;
@@ -123,21 +149,6 @@ export default class Client extends EventEmitter {
         }
     }
 
-    public addListener<key extends keyof Events>(name: key, listener: (client: this, ...args: Events[key]) => void): this {
-        return super.addListener(name, listener);
-    }
-    public emit<key extends keyof Events>(name: key, client: this, ...args: Events[key]): boolean {
-        return super.emit(name, client, ...args);
-    }
-    public eventNames(): (keyof Events)[] {
-        return super.eventNames() as (keyof Events)[];
-    }
-    public listenerCount<key extends keyof Events>(name: key, listener?: (client: this, ...args: Events[key]) => void): number {
-        return super.listenerCount(name, listener);
-    }
-    public listeners<key extends keyof Events>(name: key): Function[] {
-        return super.listeners(name);
-    }
     public login(token: string): void {
         this.token = token;
 
@@ -205,15 +216,7 @@ export default class Client extends EventEmitter {
             this.user = new User(this, response.bot!);
         });
     }
-    public off<key extends keyof Events>(name: key, listener: (client: this, ...args: Events[key]) => void): this {
-        return super.off(name, listener);
-    }
-    public on<key extends keyof Events>(name: key, listener: (client: this, ...args: Events[key]) => void): this {
-        return super.on(name, listener);
-    }
-    public once<key extends keyof Events>(name: key, listener: (client: this, ...args: Events[key]) => void): this {
-        return super.once(name, listener);
-    }
+
     public async ping(): Promise<number> {
         return new Promise((resolve, reject) => {
             try {
@@ -225,34 +228,16 @@ export default class Client extends EventEmitter {
             }
         });
     }
-    public prependListener<key extends keyof Events>(name: key, listener: (client: this, ...args: Events[key]) => void): this {
-        return super.prependListener(name, listener);
-    }
-    public prependOnceListener<key extends keyof Events>(name: key, listener: (client: this, ...args: Events[key]) => void): this {
-        return super.prependOnceListener(name, listener);
-    }
     public randomNumber(minimum: number, maximum: number, decimal?: boolean): number {
         const random = Math.random() * (maximum - minimum);
 
         return decimal ? random + minimum : Math.floor(random) + minimum;
-    }
-    public rawListeners<key extends keyof Events>(name: key): Function[] {
-        return super.rawListeners(name);
-    }
-    public removeAllListeners(name?: keyof Events): this {
-        return super.removeAllListeners(name);
-    }
-    public removeListener<key extends keyof Events>(name: key, listener: (client: this, ...args: Events[key]) => void): this {
-        return super.removeListener(name, listener);
     }
     public async request(options: RequestOptions): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             this.processQueue.push({ options, resolve, reject });
             this.process();
         });
-    }
-    public setMaxListeners(number: number): this {
-        return super.setMaxListeners(number);
     }
     public toCase(text: string): string {
         return `${text[0].toUpperCase()}${text.slice(1).toLowerCase()}`;
